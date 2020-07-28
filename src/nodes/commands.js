@@ -90,14 +90,22 @@ module.exports = {
       return concat(parts);
     }
 
-    parts.push(" ");
+    const requiresParens = path.getParentNode().type === "if";
+    if (!requiresParens) {
+      parts.push(" ");
+    }
     const { args, heredocs } = makeArgs(path, opts, print, 3);
-
     if (heredocs.length > 1) {
       return concat(parts.concat([join(", ", args)]).concat(heredocs));
     }
 
-    const joinedArgs = join(concat([",", line]), args);
+    if (requiresParens) {
+      parts.push("(");
+    }
+    const joinedArgs = concat([
+      join(concat([",", line]), args),
+      requiresParens ? ")" : ""
+    ]);
     const breakArgs = skipArgsAlign(path)
       ? joinedArgs
       : align(docLength(concat(parts)), joinedArgs);

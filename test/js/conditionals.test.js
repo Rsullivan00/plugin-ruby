@@ -219,6 +219,30 @@ describe("conditionals", () => {
       return expect(content).toChangeFormat("a ? 1 : 2");
     });
 
+    test("adds parens to call to avoid ternary collision", () => {
+      const content = ruby(`
+        if a.foo? bar
+          1
+        else
+          2
+        end
+      `);
+
+      return expect(content).toChangeFormat("a.foo?(bar) ? 1 : 2");
+    });
+
+    test("does not add parens to call without ternary conversion", () => {
+      const content = ruby(`
+        if a.foo? ${long}
+          1
+        else
+          2
+        end
+      `);
+
+      return expect(content).toMatchFormat();
+    });
+
     test("transform for unless/else", () => {
       const content = ruby(`
         unless a
